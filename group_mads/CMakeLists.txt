@@ -9,12 +9,6 @@
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 
-if(APPLE)
-    set(IS_MACOS "yes")
-endif()
-
-set(CMAKE_SYSTEM_NAME Linux)
-
 # This defines which is the lowest supported CMake version for this project
 cmake_minimum_required(VERSION 3.22.1)
 
@@ -40,9 +34,9 @@ include(FetchContent)
 # Defines which architecture our operating system is using. We will be using i386, which is a 32-bit architecture
 set(OS_ARCH_TARGET i386)  # x86_64
 # The operating system name.
-set(OS_NAME "UiA Operating System")
+set(OS_NAME "Thomas Operating System")
 # CMake target name for our operating system
-set(OS_KERNEL_NAME "uia-os")
+set(OS_KERNEL_NAME "tn-os")
 # Predefined list for our application targets
 set(OS_APPLICATIONS)
 # Predefined list for our libraries
@@ -146,8 +140,6 @@ endif()
 set(OS_MODULE_BOOT_NAME ${OS_KERNEL_NAME}-boot)
 # Defines all source-files that are related to the bootloader
 set(OS_MODULE_BOOT_SOURCES
-        #${ARCH_TARGET}/boot.asm
-        src/boot/src/boot.cpp
         src/boot/src/boot.asm
 )
 # Creates a library for our multi-boot section
@@ -214,11 +206,3 @@ set_target_properties(
 # Configure a bootable image of our operating system
 ########################################
 add_subdirectory(grub)
-
-########################################
-###
-### Add a target called 'build', which will build all other targets.
-###
-########################################
-add_custom_target(build)
-add_dependencies(build ${GRUB_TARGET})

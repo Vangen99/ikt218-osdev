@@ -10,20 +10,18 @@ MBOOT_CHECKSUM         equ -(MBOOT_HEADER_MAGIC + MBOOT_HEADER_FLAGS)
 ; Stack configuration. The size of our stack (16KB).
 KERNEL_STACK_SIZE equ 0x4000
 
-section .text
-global _start:function (_start.end - _start)
-
-multiboot_header:
+section .multiboot
+multiboot:
+align 4
     dd  MBOOT_HEADER_MAGIC      ; GRUB will search for this value on each 4-byte boundary in your kernel file
     dd  MBOOT_HEADER_FLAGS      ; How GRUB should load your file / settings
     dd  MBOOT_CHECKSUM          ; To ensure that the above values are correct
 
-	dd 0
-	dd 0
-	dd 0 
-	dd 0 
-	dd 0 
-
+		dd 0
+		dd 0
+		dd 0 
+		dd 0 
+		dd 0 
     ; Graphic field
     dd 0
     dd 640
@@ -38,16 +36,13 @@ stack_top:
 
 section .text
 global _start:function (_start.end - _start)
+extern kernel_main
 _start:
-	; extern init_multiboot
-	; push ebx ; multiboot_info struct
-	; push eax ; magic number
-	; call init_multiboot
-
+	
 	mov esp, stack_top
 
-	extern kernel_main
 	call kernel_main  ; call our kernel_main() function.
+
 	cli
 .hang:	hlt
 	jmp .hang

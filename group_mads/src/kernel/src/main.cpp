@@ -1,13 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "system.h"
 #include "gdt.h"
-
-// Define entry point in asm to prevent C++ mangling
-extern "C"{
-    void kernel_main();
-}
  
 /* This tutorial will only work for the 32-bit ix86 targets. */
 #if !defined(__i386__)
@@ -60,7 +54,7 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
  
-void terminal_initialize(void) 
+void terminal_clear(void) 
 {
 	terminal_row = 0;
 	terminal_column = 0;
@@ -87,11 +81,17 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
  
 void terminal_putchar(char c) 
 {
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-	if (++terminal_column == VGA_WIDTH) {
+	if (c == '\n') {
 		terminal_column = 0;
 		if (++terminal_row == VGA_HEIGHT)
 			terminal_row = 0;
+	} else {
+		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+		if (++terminal_column == VGA_WIDTH) {
+			terminal_column = 0;
+			if (++terminal_row == VGA_HEIGHT)
+				terminal_row = 0;
+		}
 	}
 }
  
@@ -101,21 +101,25 @@ void terminal_write(const char* data, size_t size)
 		terminal_putchar(data[i]);
 }
  
-void terminal_writestring(const char* data) 
+void printf(const char* data) 
 {
 	terminal_write(data, strlen(data));
 }
  
+extern "C" {
+	void kernel_main();
+}
+
 void kernel_main(void) 
 {
-
-    // Initialise the global descriptor table.
-    void init_descriptor_tables();
-    //terminal_writestring("Initialising GDT\n");
-
 	/* Initialize terminal interface */
-	terminal_initialize();
+	terminal_clear();
+
+	printf("Initializing GDT..\n");
+	GDT::init();
+	printf("GDT initialized!\n");
  
 	/* Newline support is left as an exercise. */
-	terminal_writestring("Digg as\n");
+	printf("OS started\n");
+    printf("Hello World!");
 }
